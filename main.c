@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 /* CUSTOM TYPES */
@@ -27,7 +28,7 @@ int update_shared_val() {
 
     if (pid < 0) {
         /* failure, just like you*/
-        perror("");
+        perror("fork failed");
         return EXIT_FAILURE;
     }
 
@@ -39,9 +40,13 @@ int update_shared_val() {
     } else {
         /* parent process */
         int status;
-        pid_t child_pid = wait(&status);
-        if (child_pid == -1) {
-            perror("wait() failed");
+        pid_t child_pid = waitpid(0, &status, 0);
+        if (child_pid < 0 || !WIFEXITED(status)) {
+            perror("waitpid() failed");
+            return EXIT_FAILURE;
+        }
+        if (!WIFEXITED(status)) {
+            fprintf(stderr, "child process did not terminate normally\n");
             return EXIT_FAILURE;
         }
         printf("parent before: %d\n", shared_value);

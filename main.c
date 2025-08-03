@@ -7,38 +7,47 @@
 typedef enum { FALSE, TRUE } bool_t;
 
 /* FORWARD DECLARATIONS */
-bool_t change_value(const pid_t pid);
+int update_shared_val();
 
 int main() {
-    pid_t pid = fork();
-    bool_t change_value_state = change_value(pid);
-    if (!change_value_state) {
-        perror("unable to fork program");
+    if (!update_shared_val()) {
+        return EXIT_FAILURE;
     }
     return 0;
 }
 
 
 /* FUNCTION DEFINITIONS */
-bool_t change_value(const pid_t pid) {
+int update_shared_val() {
+    pid_t pid = fork();
+
     int shared_value = 100;
     const int CHILD_VALUE = 50;
     const int PARENT_VALUE = 75;
 
-    if (pid < 0) { /* failure, just like you*/
-        return FALSE;
+    if (pid < 0) {
+        /* failure, just like you*/
+        perror("");
+        return EXIT_FAILURE;
     }
 
-    if (pid == 0) { /* child */
+    if (pid == 0) {
+        /* child process */
         printf("child before: %d\n", shared_value);
         shared_value += CHILD_VALUE;
         printf("child after: %d (expecting 150)\n", shared_value);
-    } else { /* parent */
-        wait();
+    } else {
+        /* parent process */
+        int status;
+        pid_t child_pid = wait(&status);
+        if (child_pid == -1) {
+            perror("wait() failed");
+            return EXIT_FAILURE;
+        }
         printf("parent before: %d\n", shared_value);
         shared_value += PARENT_VALUE;
         printf("parent after: %d (expecting 175)\n", shared_value);
     }
 
-    return TRUE;
+    return EXIT_SUCCESS;
 }

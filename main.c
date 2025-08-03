@@ -34,6 +34,7 @@ bool_t change_value(const pid_t pid) {
         shared_value += CHILD_VALUE;
         printf("child after: %d (expecting 150)\n", shared_value);
     } else { /* parent */
+        wait();
         printf("parent before: %d\n", shared_value);
         shared_value += PARENT_VALUE;
         printf("parent after: %d (expecting 175)\n", shared_value);

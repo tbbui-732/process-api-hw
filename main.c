@@ -56,6 +56,55 @@ int update_shared_val() {
         shared_value += PARENT_VALUE;
         printf("parent after: %d (expecting 175)\n", shared_value);
     }
+    return EXIT_SUCCESS;
+}
+
+/* TODO: problem 2 */
+int shared_file() {
+    pid_t pid = fork();
+
+    /* error check fork */
+    if (pid < 0) {
+        perror("unable to fork");
+        return EXIT_FAILURE;
+    }
+
+    /* open sample file */
+    int fd = open("public/justdoit.txt", O_RDONLY);
+    if (fd < 0) {
+        perror("unable to open file");
+        return EXIT_FAILURE;
+    }
+
+    /* processes */
+    if (pid == 0) {
+        /* TODO: child process */
+
+        /* access shared file */
+
+    } else {
+        /* TODO: parent process */
+        int status;
+        pid_t child_pid = waitpid(0, &status, 0);
+
+        /* error check waitpid */
+        if (child_pid < 0) {
+            perror("waitpid failed");
+            return EXIT_FAILURE;
+        }
+        if (!WIFEXITED(status)) {
+            fprintf(stderr, "child process did not terminate normally\n");
+            return EXIT_FAILURE;
+        }
+
+        /* access shared file */
+    }
+
+    /* clean-up open file descriptor */
+    if (close(fd) < 0) {
+        perror("unable to close file descriptor");
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

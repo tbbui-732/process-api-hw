@@ -11,6 +11,7 @@ typedef enum { FALSE, TRUE } bool_t;
 
 /* FORWARD DECLARATIONS */
 int update_shared_val();
+int shared_file();
 
 int main() {
     if (!update_shared_val()) {
@@ -19,8 +20,8 @@ int main() {
     return 0;
 }
 
-
 /* FUNCTION DEFINITIONS */
+/* problem 1 */
 int update_shared_val() {
     pid_t pid = fork();
 
@@ -43,8 +44,8 @@ int update_shared_val() {
         /* parent process */
         int status;
         pid_t child_pid = waitpid(0, &status, 0);
-        if (child_pid < 0 || !WIFEXITED(status)) {
-            perror("waitpid() failed");
+        if (child_pid < 0) {
+            perror("waitpid failed");
             return EXIT_FAILURE;
         }
         if (!WIFEXITED(status)) {

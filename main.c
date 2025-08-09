@@ -26,18 +26,20 @@ int main() {
         0
     );
 
+    /* error check shared value */
+    if (shared_value == NULL) {
+        perror("unable to map shared integer\n");
+    }
+
     printf("attempting p1\n");
-    /* TODO: these are not returning correctly... */
-    /* when a process finishes, it just continues... */
     if (update_shared_val(shared_value) == EXIT_FAILURE) {
         printf("p1 failed\n");
     }
-    /*
+
     printf("\nattempting p2\n");
-    if (!shared_file() == EXIT_FAILURE) {
+    if (shared_file() == EXIT_FAILURE) {
         printf("p2 failed\n");
     }
-    */
     return 0;
 }
 
@@ -60,6 +62,7 @@ int update_shared_val(int* shared_value) {
         printf("child before: %d\n", *shared_value);
         *shared_value += CHILD_VALUE;
         printf("child after: %d\n", *shared_value);
+        _exit(EXIT_SUCCESS);
     } else {
         /* parent process */
         int status;
@@ -79,7 +82,7 @@ int update_shared_val(int* shared_value) {
     return EXIT_SUCCESS;
 }
 
-/* TODO: problem 2 */
+/* problem 2 */
 int shared_file() {
     pid_t pid = fork();
 
@@ -90,7 +93,7 @@ int shared_file() {
     }
 
     /* open sample file */
-    int fd = open("public/justdoit.txt", O_RDONLY);
+    int fd = open("public/justdoit.txt", O_RDWR | O_APPEND | O_CREAT);
     if (fd < 0) {
         perror("unable to open file");
         return EXIT_FAILURE;
@@ -98,14 +101,13 @@ int shared_file() {
 
     /* processes */
     if (pid == 0) {
-        /* TODO: child process */
-
-        /* access shared file */
-
+        /* child process */
+        char* message = "child was here\n";
+        write(fd, message, sizeof(message));
     } else {
-        /* TODO: parent process */
+        /* parent process */
         int status;
-        pid_t child_pid = waitpid(0, &status, 0);
+        pid_t child_pid = waitpid(pid, &status, 0);
 
         /* error check waitpid */
         if (child_pid < 0) {
@@ -116,8 +118,9 @@ int shared_file() {
             fprintf(stderr, "child process did not terminate normally\n");
             return EXIT_FAILURE;
         }
-
-        /* access shared file */
+        
+        char* message = "parent was here\n";
+        write(fd, message, sizeof(message));
     }
 
     /* clean-up open file descriptor */

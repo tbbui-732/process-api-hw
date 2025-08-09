@@ -1,5 +1,5 @@
 main: main.c
-	gcc -ansi main.c -o main
+	gcc -Wall -Werror -ansi main.c -o main
 
 clean:
 	rm main

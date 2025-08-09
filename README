@@ -2,3 +2,44 @@
 ## Process API Homework
 
 Goal: Gain familiarity with process management APIs
+
+## Problem 1
+
+Without explicitly calling _wait()_, the program is no longer deterministic.
+Here is the result of calling the program twice.
+
+[wait() and exit() never called]
+process-api git:main*
+❯ ./main
+attempting p1
+parent before: 0
+parent after: 75
+child before: 0
+child after: 125
+
+process-api git:main*
+❯ ./main
+attempting p1
+parent before: 0
+parent after: 75
+child before: 75
+child after: 125
+
+Each attempt yields a different result. On the second run, the child was
+able to the read the changes made by the parent.
+
+Here is the result of letting the parent wait until the child process is
+finished.
+
+[wait() and exit() both called]
+process-api git:main*
+❯ ./main
+attempting p1
+child before: 0
+child after: 50
+parent before: 50
+parent after: 125
+
+Running this command multiple of times yields the same result. The parent
+process will not execute until the child process finishes, resulting in
+consistent outputs.
